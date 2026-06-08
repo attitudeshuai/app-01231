@@ -1,0 +1,6 @@
+node_modules
+dist
+*.local
+.git
+pnpm-lock.yaml
+package-lock.json

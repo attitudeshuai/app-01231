@@ -1,0 +1,153 @@
+# =====================================
+# 图书管理系统 - Git 忽略文件配置
+# =====================================
+
+# =====================================
+# 通用 / 系统文件
+# =====================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# 编辑器 / IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+.factorypath
+
+# =====================================
+# Java / Maven 后端 (backend/)
+# =====================================
+# 编译输出
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+.mvn/timing.properties
+!.mvn/wrapper/maven-wrapper.properties
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Spring Boot
+*.pid
+spring-shell.log
+
+# =====================================
+# Node.js / Vue.js 前端 (frontend/)
+# =====================================
+# 依赖目录
+**/node_modules/
+.pnp
+.pnp.js
+
+# 构建输出
+**/dist/
+.output
+.nuxt
+
+# 缓存
+.cache/
+.parcel-cache/
+.npm
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# 日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =====================================
+# 测试 / 覆盖率
+# =====================================
+coverage/
+*.lcov
+.nyc_output/
+
+# =====================================
+# 数据库
+# =====================================
+*.sql.bak
+*.db
+*.sqlite
+*.sqlite3
+
+# =====================================
+# Docker
+# =====================================
+mysql_data/
+uploads_data/
+data/
+
+# =====================================
+# 敏感信息
+# =====================================
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+**/application-prod.yml
+**/application-secret.yml
+secrets/
+credentials/
+
+# =====================================
+# 上传文件
+# =====================================
+uploads/
+storage/
+public/uploads/
+
+# =====================================
+# 其他
+# =====================================
+*.bak
+*.backup
+*.zip
+*.tar.gz
+*.rar
+docs/_build/
+site/

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.library.module.category.mapper.CategoryMapper">
+
+    <resultMap id="BaseResultMap" type="com.library.module.category.entity.Category">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, description, parent_id, sort_order, created_at
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM categories WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM categories ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectAllOrdered" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM categories ORDER BY parent_id ASC, sort_order ASC
+    </select>
+
+    <select id="selectByCondition" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM categories
+        <where>
+            <if test="params.name != null and params.name != ''">
+                AND name LIKE CONCAT('%', #{params.name}, '%')
+            </if>
+            <if test="params.parentId != null">
+                AND parent_id = #{params.parentId}
+            </if>
+        </where>
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM categories
+        <where>
+            <if test="params.name != null and params.name != ''">
+                AND name LIKE CONCAT('%', #{params.name}, '%')
+            </if>
+        </where>
+        ORDER BY sort_order ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByCondition" resultType="long">
+        SELECT COUNT(*) FROM categories
+        <where>
+            <if test="params.name != null and params.name != ''">
+                AND name LIKE CONCAT('%', #{params.name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO categories (name, description, parent_id, sort_order, created_at)
+        VALUES (#{name}, #{description}, #{parentId}, #{sortOrder}, NOW())
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO categories (name, description, parent_id, sort_order, created_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.name}, #{item.description}, #{item.parentId}, #{item.sortOrder}, NOW())
+        </foreach>
+    </insert>
+
+    <update id="updateById">
+        UPDATE categories
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM categories WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBatchIds">
+        DELETE FROM categories WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="exists" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM categories
+        <where>
+            <if test="params.id != null">AND id = #{params.id}</if>
+            <if test="params.name != null">AND name = #{params.name}</if>
+        </where>
+    </select>
+
+    <select id="selectByParentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM categories 
+        WHERE parent_id = #{parentId}
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectByName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM categories WHERE name = #{name}
+    </select>
+
+    <select id="countBooksByCategoryId" resultType="int">
+        SELECT COUNT(*) FROM books WHERE category_id = #{categoryId}
+    </select>
+
+    <select id="countByParentId" resultType="int">
+        SELECT COUNT(*) FROM categories WHERE parent_id = #{parentId}
+    </select>
+</mapper>

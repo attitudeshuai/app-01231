@@ -1,0 +1,69 @@
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: library-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: library_db
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./backend/src/main/resources/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/src/main/resources/db/data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --init-connect=SET NAMES utf8mb4
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: library-backend
+    restart: always
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: library_db
+      DB_USER: root
+      DB_PASSWORD: root123456
+      JWT_SECRET: TGlicmFyeU1hbmFnZW1lbnRTeXN0ZW1TZWNyZXRLZXkyMDI0VmVyeUxvbmdTZWNyZXRLZXlGb3JTZWN1cml0eQ==
+      FILE_UPLOAD_PATH: /app/uploads
+      TZ: Asia/Shanghai
+    ports:
+      - "9999:9999"
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # 前端
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: library-frontend
+    restart: always
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
+  uploads_data:

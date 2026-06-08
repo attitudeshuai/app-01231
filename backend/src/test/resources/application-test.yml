@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password: 
+  h2:
+    console:
+      enabled: false
+  sql:
+    init:
+      mode: never
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+jwt:
+  secret: test-secret-key-for-unit-testing-must-be-at-least-256-bits-long-for-hs256
+  expiration: 3600000
+  refresh-expiration: 604800000
+
+file:
+  upload:
+    path: /tmp/test-uploads
+
+library:
+  default-borrow-days: 30
+  max-renew-times: 1
+  renew-days: 30
+  overdue-fine-per-day: 0.5
+  reminder-days-before: 3
+  stock-warning-threshold: 5
+
+logging:
+  level:
+    com.library: DEBUG

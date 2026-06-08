@@ -1,0 +1,24 @@
+# Maven 构建输出
+target
+
+# 编辑器/IDE
+.idea
+*.iml
+.vscode
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# 日志
+*.log
+
+# 其他
+README.md
+*.md

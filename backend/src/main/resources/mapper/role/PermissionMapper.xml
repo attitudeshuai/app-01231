@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.library.module.role.mapper.PermissionMapper">
+
+    <resultMap id="BaseResultMap" type="com.library.module.role.entity.Permission">
+        <id column="id" property="id"/>
+        <result column="permission_name" property="permissionName"/>
+        <result column="permission_code" property="permissionCode"/>
+        <result column="resource_type" property="resourceType"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="sort_order" property="sortOrder"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, permission_name, permission_code, resource_type, parent_id, sort_order
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM permissions WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM permissions ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectAllOrdered" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM permissions ORDER BY parent_id ASC, sort_order ASC
+    </select>
+
+    <select id="selectByCondition" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM permissions
+        <where>
+            <if test="params.permissionName != null and params.permissionName != ''">
+                AND permission_name LIKE CONCAT('%', #{params.permissionName}, '%')
+            </if>
+            <if test="params.resourceType != null and params.resourceType != ''">
+                AND resource_type = #{params.resourceType}
+            </if>
+        </where>
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM permissions
+        <where>
+            <if test="params.permissionName != null and params.permissionName != ''">
+                AND permission_name LIKE CONCAT('%', #{params.permissionName}, '%')
+            </if>
+        </where>
+        ORDER BY sort_order ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByCondition" resultType="long">
+        SELECT COUNT(*) FROM permissions
+        <where>
+            <if test="params.permissionName != null and params.permissionName != ''">
+                AND permission_name LIKE CONCAT('%', #{params.permissionName}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO permissions (permission_name, permission_code, resource_type, parent_id, sort_order)
+        VALUES (#{permissionName}, #{permissionCode}, #{resourceType}, #{parentId}, #{sortOrder})
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO permissions (permission_name, permission_code, resource_type, parent_id, sort_order)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.permissionName}, #{item.permissionCode}, #{item.resourceType}, 
+             #{item.parentId}, #{item.sortOrder})
+        </foreach>
+    </insert>
+
+    <update id="updateById">
+        UPDATE permissions
+        <set>
+            <if test="permissionName != null">permission_name = #{permissionName},</if>
+            <if test="permissionCode != null">permission_code = #{permissionCode},</if>
+            <if test="resourceType != null">resource_type = #{resourceType},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM permissions WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBatchIds">
+        DELETE FROM permissions WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="exists" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM permissions
+        <where>
+            <if test="params.id != null">AND id = #{params.id}</if>
+            <if test="params.permissionCode != null">AND permission_code = #{params.permissionCode}</if>
+        </where>
+    </select>
+
+    <select id="selectByParentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM permissions 
+        WHERE parent_id = #{parentId}
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectByPermissionCode" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM permissions WHERE permission_code = #{permissionCode}
+    </select>
+
+    <select id="selectByRoleIds" resultMap="BaseResultMap">
+        SELECT DISTINCT p.*
+        FROM permissions p
+        INNER JOIN role_permissions rp ON p.id = rp.permission_id
+        WHERE rp.role_id IN
+        <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+        ORDER BY p.sort_order ASC
+    </select>
+</mapper>

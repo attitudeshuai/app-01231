@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.library.module.book.mapper.BookMapper">
+
+    <resultMap id="BaseResultMap" type="com.library.module.book.entity.Book">
+        <id column="id" property="id"/>
+        <result column="isbn" property="isbn"/>
+        <result column="title" property="title"/>
+        <result column="author" property="author"/>
+        <result column="publisher" property="publisher"/>
+        <result column="publish_date" property="publishDate"/>
+        <result column="price" property="price"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="cover_url" property="coverUrl"/>
+        <result column="description" property="description"/>
+        <result column="total_stock" property="totalStock"/>
+        <result column="available_stock" property="availableStock"/>
+        <result column="location" property="location"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="category_name" property="categoryName"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, isbn, title, author, publisher, publish_date, price, category_id,
+        cover_url, description, total_stock, available_stock, location, status,
+        created_at, updated_at
+    </sql>
+
+    <sql id="Book_Where_Clause">
+        <where>
+            <if test="params.title != null and params.title != ''">
+                AND b.title LIKE CONCAT('%', #{params.title}, '%')
+            </if>
+            <if test="params.author != null and params.author != ''">
+                AND b.author LIKE CONCAT('%', #{params.author}, '%')
+            </if>
+            <if test="params.isbn != null and params.isbn != ''">
+                AND b.isbn LIKE CONCAT('%', #{params.isbn}, '%')
+            </if>
+            <if test="params.categoryId != null">
+                AND b.category_id = #{params.categoryId}
+            </if>
+            <if test="params.status != null">
+                AND b.status = #{params.status}
+            </if>
+            <if test="params.keyword != null and params.keyword != ''">
+                AND (b.title LIKE CONCAT('%', #{params.keyword}, '%')
+                     OR b.author LIKE CONCAT('%', #{params.keyword}, '%')
+                     OR b.isbn LIKE CONCAT('%', #{params.keyword}, '%'))
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT b.*, c.name as category_name
+        FROM books b
+        LEFT JOIN categories c ON b.category_id = c.id
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT b.*, c.name as category_name
+        FROM books b
+        LEFT JOIN categories c ON b.category_id = c.id
+        ORDER BY b.created_at DESC
+    </select>
+
+    <select id="selectByCondition" resultMap="BaseResultMap">
+        SELECT b.*, c.name as category_name
+        FROM books b
+        LEFT JOIN categories c ON b.category_id = c.id
+        <include refid="Book_Where_Clause"/>
+        ORDER BY b.created_at DESC
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT b.*, c.name as category_name
+        FROM books b
+        LEFT JOIN categories c ON b.category_id = c.id
+        <include refid="Book_Where_Clause"/>
+        ORDER BY b.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="selectPageWithCategory" resultMap="BaseResultMap">
+        SELECT b.*, c.name as category_name
+        FROM books b
+        LEFT JOIN categories c ON b.category_id = c.id
+        <include refid="Book_Where_Clause"/>
+        ORDER BY b.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByCondition" resultType="long">
+        SELECT COUNT(*)
+        FROM books b
+        <include refid="Book_Where_Clause"/>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO books (isbn, title, author, publisher, publish_date, price,
+                          category_id, cover_url, description, total_stock,
+                          available_stock, location, status, created_at, updated_at)
+        VALUES (#{isbn}, #{title}, #{author}, #{publisher}, #{publishDate}, #{price},
+                #{categoryId}, #{coverUrl}, #{description}, #{totalStock},
+                #{availableStock}, #{location}, #{status}, NOW(), NOW())
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO books (isbn, title, author, publisher, publish_date, price,
+                          category_id, cover_url, description, total_stock,
+                          available_stock, location, status, created_at, updated_at)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.isbn}, #{item.title}, #{item.author}, #{item.publisher}, 
+             #{item.publishDate}, #{item.price}, #{item.categoryId}, #{item.coverUrl},
+             #{item.description}, #{item.totalStock}, #{item.availableStock},
+             #{item.location}, #{item.status}, NOW(), NOW())
+        </foreach>
+    </insert>
+
+    <update id="updateById">
+        UPDATE books
+        <set>
+            <if test="isbn != null">isbn = #{isbn},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="author != null">author = #{author},</if>
+            <if test="publisher != null">publisher = #{publisher},</if>
+            <if test="publishDate != null">publish_date = #{publishDate},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="coverUrl != null">cover_url = #{coverUrl},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="totalStock != null">total_stock = #{totalStock},</if>
+            <if test="availableStock != null">available_stock = #{availableStock},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM books WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBatchIds">
+        DELETE FROM books WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="exists" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM books
+        <where>
+            <if test="params.id != null">AND id = #{params.id}</if>
+            <if test="params.isbn != null">AND isbn = #{params.isbn}</if>
+        </where>
+    </select>
+
+    <select id="selectByIsbn" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books WHERE isbn = #{isbn}
+    </select>
+
+    <update id="updateStock">
+        UPDATE books 
+        SET total_stock = #{totalStock}, 
+            available_stock = #{availableStock},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="decreaseAvailableStock">
+        UPDATE books 
+        SET available_stock = available_stock - #{count},
+            updated_at = NOW()
+        WHERE id = #{id} AND available_stock >= #{count}
+    </update>
+
+    <update id="increaseAvailableStock">
+        UPDATE books 
+        SET available_stock = available_stock + #{count},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectStockWarning" resultMap="BaseResultMap">
+        SELECT b.*, c.name as category_name
+        FROM books b
+        LEFT JOIN categories c ON b.category_id = c.id
+        WHERE b.available_stock &lt;= #{threshold} AND b.status = 1
+        ORDER BY b.available_stock ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countStockWarning" resultType="long">
+        SELECT COUNT(*) FROM books 
+        WHERE available_stock &lt;= #{threshold} AND status = 1
+    </select>
+
+    <update id="updateStatus">
+        UPDATE books SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+</mapper>
